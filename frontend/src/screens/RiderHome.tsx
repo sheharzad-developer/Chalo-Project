@@ -118,6 +118,7 @@ export default function RiderHome() {
   const [paid, setPaid] = useState(false);
   const [tripPhase, setTripPhase] = useState<'pickup' | 'dropoff' | 'arrived' | null>(null);
   const [vehicleType, setVehicleType] = useState<VehicleType>('car');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
   const [trackerToken, setTrackerToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -202,7 +203,10 @@ export default function RiderHome() {
 
   function primaryButtonLabel() {
     if (paid) return '✓ Paid — Ride Complete';
-    if (tripPhase === 'arrived') return `Pay Rs ${estimate?.fare.toFixed(0) ?? '—'}`;
+    if (tripPhase === 'arrived') {
+      const amount = `Rs ${estimate?.fare.toFixed(0) ?? '—'}`;
+      return paymentMethod === 'cash' ? `Confirm cash — ${amount}` : `Pay ${amount}`;
+    }
     if (rideRequested) return 'Waiting for driver...';
     if (estimate && destinationCoords) return `Request ${VEHICLES.find(v => v.type === vehicleType)?.label ?? 'Ride'}`;
     if (settingDestination) return 'Get estimate';
@@ -215,7 +219,10 @@ export default function RiderHome() {
 
   async function onPrimaryPress() {
     if (!coords) return;
-    if (tripPhase === 'arrived' && !paid) { await payRide(); return; }
+    if (tripPhase === 'arrived' && !paid) {
+      if (paymentMethod === 'cash') { await confirmCashPayment(); } else { await payRide(); }
+      return;
+    }
     if (!settingDestination) { setSettingDestination(true); return; }
     if (estimate && destinationCoords) { await requestRide(); return; }
     await estimateDestination();
@@ -268,6 +275,7 @@ export default function RiderHome() {
         distance_km: estimate.distance_km,
         duration_min: estimate.duration_min,
         vehicle_type: vehicleType,
+        payment_method: paymentMethod,
       });
       setEstimate({ ...estimate, fare: finalFare });
       setCurrentRideId(data.id);
@@ -334,6 +342,23 @@ export default function RiderHome() {
       );
     } catch (error) {
       Alert.alert('Confirmation failed', getErrorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function confirmCashPayment() {
+    if (!currentRideId) return;
+    try {
+      setSubmitting(true);
+      await api.post('/payments/confirm-cash', { ride_id: currentRideId });
+      setPaid(true);
+      Alert.alert(
+        'Ride complete',
+        estimate ? `Please pay Rs ${estimate.fare.toFixed(0)} in cash to your driver. Shukria for riding with Chalo! 🚗` : 'Cash ride complete.',
+      );
+    } catch (error) {
+      Alert.alert('Could not confirm payment', getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -469,6 +494,21 @@ export default function RiderHome() {
                 );
               })}
             </View>
+            <Text style={styles.panelLabel}>Payment</Text>
+            <View style={styles.payRow}>
+              {([
+                { key: 'cash', label: 'Cash', icon: '💵' },
+                { key: 'card', label: 'Card', icon: '💳' },
+              ] as const).map((m) => {
+                const active = paymentMethod === m.key;
+                return (
+                  <Pressable key={m.key} onPress={() => setPaymentMethod(m.key)} style={[styles.payChip, active && styles.payChipActive]}>
+                    <Text style={styles.payIcon}>{m.icon}</Text>
+                    <Text style={[styles.payText, active && styles.payTextActive]}>{m.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </>
         )}
 
@@ -521,6 +561,12 @@ const styles = StyleSheet.create({
   vehicleEtaActive: { color: '#0f766e' },
   vehicleFare: { color: '#0f172a', fontSize: 13, fontWeight: '800' },
   vehicleFareActive: { color: '#0f766e' },
+  payRow: { flexDirection: 'row', gap: 8 },
+  payChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 12, paddingVertical: 11, backgroundColor: '#fafafa' },
+  payChipActive: { borderColor: '#0f766e', backgroundColor: '#f0fdf4' },
+  payIcon: { fontSize: 16 },
+  payText: { color: '#475569', fontSize: 14, fontWeight: '700' },
+  payTextActive: { color: '#0f766e' },
   primaryButton: { backgroundColor: '#0f172a', minHeight: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
   primaryButtonDisabled: { backgroundColor: '#94a3b8' },
   primaryButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '800' },

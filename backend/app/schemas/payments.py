@@ -18,6 +18,10 @@ class ConfirmRidePaymentIn(BaseModel):
     tracker_token: str
 
 
+class ConfirmCashIn(BaseModel):
+    ride_id: uuid.UUID
+
+
 class WebhookPayload(BaseModel):
     tracker_token: str
     state: str

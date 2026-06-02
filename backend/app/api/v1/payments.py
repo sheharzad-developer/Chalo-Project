@@ -10,6 +10,7 @@ from app.deps import get_current_user
 from app.models.profile import Profile
 from app.models.ride import Ride, RideStatus
 from app.schemas.payments import (
+    ConfirmCashIn,
     ConfirmRidePaymentIn,
     InitRidePaymentIn,
     InitRidePaymentOut,
@@ -101,6 +102,33 @@ async def confirm_ride_payment(
         "ride_id": str(ride.id),
         "fare": ride.fare,
     }
+    await manager.send(str(ride.rider_id), receipt)
+    if ride.driver_id is not None:
+        await manager.send(str(ride.driver_id), receipt)
+
+    return {"ok": True}
+
+
+@router.post("/confirm-cash")
+async def confirm_cash_payment(
+    data: ConfirmCashIn,
+    user: Profile = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Rider confirms cash was handed to the driver — completes the ride, no SafePay."""
+    ride = await db.get(Ride, data.ride_id)
+    if ride is None:
+        raise HTTPException(404, "Ride not found")
+    if ride.rider_id != user.id:
+        raise HTTPException(403, "Only the rider can confirm this payment")
+    if ride.payment_method != "cash":
+        raise HTTPException(400, "This ride is not a cash ride")
+
+    ride.status = RideStatus.completed
+    ride.ended_at = datetime.now(UTC)
+    await db.commit()
+
+    receipt = {"type": "ride_paid", "ride_id": str(ride.id), "fare": ride.fare, "method": "cash"}
     await manager.send(str(ride.rider_id), receipt)
     if ride.driver_id is not None:
         await manager.send(str(ride.driver_id), receipt)

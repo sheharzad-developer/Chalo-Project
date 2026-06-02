@@ -29,6 +29,7 @@ class Ride(Base):
     distance_km = Column(Float)
     duration_min = Column(Float)
     payment_intent_id = Column(String, nullable=True)
+    payment_method = Column(String, default="card", nullable=False)
     vehicle_type = Column(String, default="car")
     requested_at = Column(DateTime(timezone=True), server_default=func.now())
     started_at = Column(DateTime(timezone=True), nullable=True)

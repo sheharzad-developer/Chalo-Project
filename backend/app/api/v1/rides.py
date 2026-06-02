@@ -46,6 +46,7 @@ async def request_ride(
         distance_km=data.distance_km,
         duration_min=data.duration_min,
         vehicle_type=data.vehicle_type,
+        payment_method=data.payment_method,
     )
     db.add(ride)
     try:
@@ -75,5 +76,6 @@ async def request_ride(
         pickup_address=ride.pickup_address,
         dropoff_address=ride.dropoff_address,
         vehicle_type=ride.vehicle_type,
+        payment_method=ride.payment_method,
         requested_at=ride.requested_at or datetime.now(UTC),
     )

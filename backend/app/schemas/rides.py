@@ -31,6 +31,7 @@ class RideRequestIn(BaseModel):
     distance_km: float
     duration_min: float
     vehicle_type: str = 'car'
+    payment_method: str = 'card'
 
 
 class RideOut(BaseModel):
@@ -46,4 +47,5 @@ class RideOut(BaseModel):
     pickup_address: str | None = None
     dropoff_address: str | None = None
     vehicle_type: str | None = None
+    payment_method: str | None = None
     requested_at: datetime
