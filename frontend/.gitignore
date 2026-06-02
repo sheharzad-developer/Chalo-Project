@@ -27,6 +27,3 @@ yarn-error.*
 
 # misc
 *.tsbuildinfo
-
-# excluded: kept getting real secrets pasted in
-.env.example
