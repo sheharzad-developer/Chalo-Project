@@ -11,6 +11,7 @@ import RiderHome from './src/screens/RiderHome';
 import Profile from './src/screens/Profile';
 import PayHub from './src/screens/PayHub';
 import Settings from './src/screens/Settings';
+import Receipts from './src/screens/Receipts';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -82,7 +83,14 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {session ? (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen
+              name="Receipts"
+              component={Receipts}
+              options={{ headerShown: true, title: 'Ride history' }}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={Login} />

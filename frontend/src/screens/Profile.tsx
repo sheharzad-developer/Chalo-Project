@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../stores/auth';
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
 export default function Profile() {
+  const nav = useNavigation<any>();
   const session = useAuth((s) => s.session);
   const signOut = useAuth((s) => s.signOut);
   const user = session?.user;
@@ -61,7 +63,7 @@ export default function Profile() {
         <View style={styles.card}>
           <ActionRow icon="card-outline" label="Payment methods" subtitle="Manage cards via SafePay" />
           <Divider />
-          <ActionRow icon="time-outline" label="Ride history" subtitle="Past trips & receipts" />
+          <ActionRow icon="time-outline" label="Ride history" subtitle="Past trips & receipts" onPress={() => nav.navigate('Receipts')} />
           <Divider />
           <ActionRow icon="gift-outline" label="Promotions" subtitle="Invite & earn" />
           <Divider />
