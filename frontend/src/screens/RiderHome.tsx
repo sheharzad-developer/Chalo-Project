@@ -351,7 +351,7 @@ export default function RiderHome() {
     if (!currentRideId) return;
     try {
       setSubmitting(true);
-      await api.post('/payments/confirm-cash', { ride_id: currentRideId });
+      await api.post('/payments/cash-ride-payment', { ride_id: currentRideId });
       setPaid(true);
       Alert.alert(
         'Ride complete',
