@@ -2,6 +2,9 @@
 .env
 .env.*
 *.env
+# ...but DO commit the placeholder templates
+!.env.example
+!**/.env.example
 
 # python
 __pycache__/
