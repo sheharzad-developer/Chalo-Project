@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# secrets / environment
+.env
+.env.*
+!.env.example
+
+# expo
+.expo/
+dist/
+web-build/
+*.orig.*
+
+# native builds
+ios/
+android/
+
+# logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# misc
+*.tsbuildinfo
+
+# excluded: kept getting real secrets pasted in
+.env.example

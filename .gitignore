@@ -1,0 +1,33 @@
+# secrets / environment — never commit
+.env
+.env.*
+*.env
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# node / expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# native builds
+ios/
+android/
+
+# logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# os / editor
+.DS_Store
+*.tsbuildinfo
