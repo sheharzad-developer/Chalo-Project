@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -9,8 +8,32 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { api } from '../api/client';
+
+type RecentReceipt = {
+  id: string;
+  fare: number;
+  payment_method: 'cash' | 'card';
+  dropoff_address: string | null;
+  created_at: string;
+};
 
 export default function PayHub() {
+  const nav = useNavigation<any>();
+  const [recent, setRecent] = useState<RecentReceipt[] | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const { data } = await api.get<RecentReceipt[]>('/payments/receipts');
+      setRecent(data.slice(0, 3));
+    } catch {
+      setRecent([]);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.inner} showsVerticalScrollIndicator={false}>
@@ -18,6 +41,24 @@ export default function PayHub() {
         <Text style={styles.subtitle}>
           Payment is handled securely through SafePay when you complete a ride.
         </Text>
+
+        {recent && recent.length > 0 && (
+          <View style={styles.recentCard}>
+            <View style={styles.recentHeader}>
+              <Text style={styles.recentTitle}>Recent rides</Text>
+              <Pressable onPress={() => nav.navigate('Receipts')} hitSlop={8}>
+                <Text style={styles.viewAll}>View all</Text>
+              </Pressable>
+            </View>
+            {recent.map((r, i) => (
+              <View key={r.id} style={[styles.recentRow, i > 0 && styles.recentRowBorder]}>
+                <Ionicons name={r.payment_method === 'cash' ? 'cash-outline' : 'card-outline'} size={16} color="#0f766e" />
+                <Text style={styles.recentAddr} numberOfLines={1}>{r.dropoff_address || 'Destination'}</Text>
+                <Text style={styles.recentFare}>Rs {r.fare.toFixed(0)}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
@@ -103,6 +144,15 @@ const styles = StyleSheet.create({
   inner: { padding: 20, gap: 16, paddingBottom: 40 },
   title: { color: '#0f172a', fontSize: 28, fontWeight: '800', marginTop: 8 },
   subtitle: { color: '#475569', fontSize: 14, lineHeight: 20 },
+
+  recentCard: { backgroundColor: '#ffffff', borderRadius: 16, padding: 16, shadowColor: '#000', shadowOpacity: 0.07, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  recentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  recentTitle: { color: '#0f172a', fontSize: 15, fontWeight: '800' },
+  viewAll: { color: '#0f766e', fontSize: 13, fontWeight: '800' },
+  recentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
+  recentRowBorder: { borderTopWidth: 1, borderTopColor: '#f1f5f9' },
+  recentAddr: { flex: 1, color: '#0f172a', fontSize: 14, fontWeight: '600' },
+  recentFare: { color: '#0f172a', fontSize: 14, fontWeight: '800' },
 
   infoCard: {
     backgroundColor: '#ffffff',

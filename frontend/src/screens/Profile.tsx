@@ -65,6 +65,12 @@ export default function Profile() {
           <Divider />
           <ActionRow icon="time-outline" label="Ride history" subtitle="Past trips & receipts" onPress={() => nav.navigate('Receipts')} />
           <Divider />
+          {role === 'driver' && (
+            <>
+              <ActionRow icon="wallet-outline" label="Earnings" subtitle="Cash & card payouts" onPress={() => nav.navigate('DriverEarnings')} />
+              <Divider />
+            </>
+          )}
           <ActionRow icon="gift-outline" label="Promotions" subtitle="Invite & earn" />
           <Divider />
           <ActionRow icon="help-circle-outline" label="Help center" subtitle="FAQ & support" />

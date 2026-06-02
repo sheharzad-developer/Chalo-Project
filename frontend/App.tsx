@@ -12,6 +12,7 @@ import Profile from './src/screens/Profile';
 import PayHub from './src/screens/PayHub';
 import Settings from './src/screens/Settings';
 import Receipts from './src/screens/Receipts';
+import DriverEarnings from './src/screens/DriverEarnings';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -89,6 +90,11 @@ export default function App() {
               name="Receipts"
               component={Receipts}
               options={{ headerShown: true, title: 'Ride history' }}
+            />
+            <Stack.Screen
+              name="DriverEarnings"
+              component={DriverEarnings}
+              options={{ headerShown: true, title: 'Earnings' }}
             />
           </>
         ) : (
